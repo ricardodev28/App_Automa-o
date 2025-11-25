@@ -741,6 +741,337 @@ Este projeto foi desenvolvido como demonstração de:
 
 ---
 
+## 🚀 Próximos Passos de Configuração
+
+Após clonar o repositório, siga estes passos para configurar e executar o projeto:
+
+### 📋 Passo 1: Configurar Supabase (5 minutos)
+
+#### 1.1. Criar Projeto no Supabase
+
+1. **Acesse** [supabase.com](https://supabase.com) e faça login (ou crie uma conta gratuita)
+2. **Clique** em **"New Project"**
+3. **Preencha** os dados do projeto:
+   - **Name**: `document-management` (ou nome de sua preferência)
+   - **Database Password**: Crie uma senha forte e **guarde-a**
+   - **Region**: Escolha a região mais próxima de você
+4. **Aguarde** a criação do projeto (~2 minutos)
+
+#### 1.2. Executar Schema do Banco de Dados
+
+1. No painel do Supabase, vá em **SQL Editor** (menu lateral esquerdo)
+2. Clique em **"New Query"**
+3. Abra o arquivo `database/schema.sql` do projeto
+4. **Copie todo o conteúdo** e cole no editor SQL
+5. Clique em **"Run"** (ou pressione Ctrl+Enter)
+6. ✅ Você verá a mensagem **"Success. No rows returned"**
+
+**O que foi criado:**
+- ✅ Tabela `categories` com 6 categorias padrão (Financeiro, RH, Técnico, Marketing, Legal, Geral)
+- ✅ Tabela `documents` com todos os campos necessários
+- ✅ Índices para otimização de buscas e filtros
+- ✅ Triggers para atualização automática de timestamps
+- ✅ Políticas de segurança (Row Level Security)
+- ✅ Views para estatísticas e analytics
+
+#### 1.3. Criar Storage Bucket para Arquivos
+
+1. No Supabase, vá em **Storage** (menu lateral esquerdo)
+2. Clique em **"Create a new bucket"**
+3. Preencha:
+   - **Name**: `documents` (exatamente este nome)
+   - **Public bucket**: ✅ **Marque esta opção** (para permitir acesso aos arquivos)
+4. Clique em **"Create bucket"**
+
+#### 1.4. Obter Credenciais do Supabase
+
+1. No Supabase, vá em **Settings** → **API** (menu lateral)
+2. **Copie** as seguintes informações:
+   - **Project URL** (ex: `https://xxxxx.supabase.co`)
+   - **anon public** key (chave longa que começa com `eyJ...`)
+
+⚠️ **Importante:** Guarde essas credenciais, você vai precisar no Passo 2!
+
+---
+
+### ⚙️ Passo 2: Configurar Backend (3 minutos)
+
+#### 2.1. Criar Ambiente Virtual Python
+
+Abra o terminal na pasta do projeto e execute:
+
+```bash
+# Navegar para o backend
+cd backend
+
+# Criar ambiente virtual
+python -m venv venv
+
+# Ativar ambiente virtual
+# Windows:
+venv\Scripts\activate
+
+# Linux/Mac:
+source venv/bin/activate
+```
+
+💡 **Dica:** Você saberá que o ambiente está ativo quando ver `(venv)` no início da linha do terminal.
+
+#### 2.2. Instalar Dependências Python
+
+Com o ambiente virtual ativo, execute:
+
+```bash
+pip install -r requirements.txt
+```
+
+Isso instalará:
+- ✅ `fastapi` - Framework web
+- ✅ `uvicorn[standard]` - Servidor ASGI
+- ✅ `supabase` - Cliente Supabase
+- ✅ `openai` - Cliente OpenAI
+- ✅ `pydantic` - Validação de dados
+- ✅ `python-dotenv` - Variáveis de ambiente
+- ✅ `aiofiles` - Upload de arquivos assíncrono
+
+#### 2.3. Configurar Variáveis de Ambiente
+
+```bash
+# Copiar arquivo de exemplo
+copy .env.example .env   # Windows
+# ou
+cp .env.example .env     # Linux/Mac
+```
+
+Agora **edite o arquivo `.env`** com suas credenciais:
+
+```env
+# Supabase Configuration
+SUPABASE_URL=https://seu-projeto.supabase.co
+SUPABASE_KEY=sua-chave-anon-public-aqui
+
+# OpenAI Configuration
+OPENAI_API_KEY=sk-proj-sua-chave-openai-aqui
+
+# Application Settings
+APP_NAME="Document Management System"
+APP_VERSION="1.0.0"
+DEBUG=True
+
+# CORS Settings (Frontend URL)
+FRONTEND_URL=http://localhost:3000
+```
+
+**Como obter a OpenAI API Key:**
+1. Acesse [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+2. Faça login ou crie uma conta
+3. Clique em **"Create new secret key"**
+4. Copie a chave e cole no `.env`
+
+⚠️ **Importante:** Nunca compartilhe suas chaves de API ou faça commit do arquivo `.env`!
+
+#### 2.4. Testar Configuração
+
+```bash
+# Testar se as variáveis foram carregadas corretamente
+python -c "from config import settings; print('✅ Configuração OK!')"
+```
+
+Se aparecer `✅ Configuração OK!`, está tudo certo!
+
+#### 2.5. Executar Servidor Backend
+
+```bash
+uvicorn main:app --reload
+```
+
+✅ **Sucesso!** Você verá:
+```
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process
+INFO:     Started server process
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+```
+
+**URLs disponíveis:**
+- 🌐 API: http://localhost:8000
+- 📚 Documentação interativa: http://localhost:8000/docs
+- 📖 Documentação alternativa: http://localhost:8000/redoc
+
+⚠️ **Mantenha este terminal aberto** com o backend rodando!
+
+---
+
+### 🎨 Passo 3: Executar Frontend (1 minuto)
+
+Abra um **novo terminal** (mantenha o backend rodando no outro):
+
+```bash
+# Navegar para o frontend
+cd frontend
+
+# Servir com servidor local
+npx -y serve .
+```
+
+**Alternativas:**
+
+```bash
+# Opção 1: Python (se você tiver Python instalado)
+python -m http.server 3000
+
+# Opção 2: Node.js http-server
+npx http-server -p 3000
+
+# Opção 3: Live Server (VS Code extension)
+# Clique com botão direito em index.html > Open with Live Server
+```
+
+✅ **Sucesso!** O frontend estará disponível em:
+- 🌐 Interface: http://localhost:3000
+
+---
+
+### 🎯 Passo 4: Acessar e Testar o Sistema (2 minutos)
+
+#### 4.1. Abrir a Aplicação
+
+1. Abra seu navegador
+2. Acesse: http://localhost:3000
+3. Você verá a interface do **Sistema de Gestão de Documentos**
+
+#### 4.2. Testar Upload de Documento
+
+1. **Arraste um arquivo** para a área de upload (ou clique para selecionar)
+2. Marque ✅ **"Analisar com IA"** (se quiser análise automática)
+3. Aguarde o upload
+4. ✅ O documento aparecerá no grid abaixo
+
+**Formatos suportados:**
+- 📄 Documentos: PDF, DOCX, DOC, TXT
+- 📊 Planilhas: XLSX, XLS, CSV
+- 📽️ Apresentações: PPTX, PPT
+- 🖼️ Imagens: JPG, JPEG, PNG, GIF
+
+#### 4.3. Testar Análise com IA
+
+1. Clique no ícone **🤖** em qualquer documento
+2. Aguarde a análise (~5-10 segundos)
+3. Revise as sugestões de metadados
+4. Clique em **"Aplicar Sugestões"** ou **"Fechar"**
+
+#### 4.4. Explorar o Dashboard
+
+1. Role a página para cima
+2. Visualize as estatísticas:
+   - 📄 Total de documentos
+   - 💾 Armazenamento usado
+   - 🏷️ Tags únicas
+   - 📊 Gráficos de distribuição
+
+#### 4.5. Testar Busca e Filtros
+
+1. Digite algo na **barra de busca**
+2. Use os **filtros** de categoria e tipo
+3. Veja os resultados em tempo real
+
+#### 4.6. Verificar a API
+
+1. Acesse: http://localhost:8000/docs
+2. Explore os endpoints disponíveis
+3. Teste requisições diretamente na interface Swagger
+
+---
+
+### ✅ Checklist de Verificação
+
+Após completar os 4 passos, verifique se tudo está funcionando:
+
+- [ ] ✅ Supabase configurado (projeto criado, schema executado, bucket criado)
+- [ ] ✅ Backend rodando em http://localhost:8000
+- [ ] ✅ Frontend rodando em http://localhost:3000
+- [ ] ✅ Upload de documentos funcionando
+- [ ] ✅ Análise com IA funcionando (se configurou OpenAI)
+- [ ] ✅ Dashboard exibindo estatísticas
+- [ ] ✅ Busca e filtros funcionando
+- [ ] ✅ Documentação da API acessível em /docs
+
+---
+
+### 🔧 Problemas Comuns e Soluções
+
+#### ❌ Backend não inicia
+
+**Erro:** `ModuleNotFoundError: No module named 'fastapi'`
+
+**Solução:**
+```bash
+# Certifique-se de que o ambiente virtual está ativo
+venv\Scripts\activate
+# Reinstale as dependências
+pip install -r requirements.txt
+```
+
+---
+
+#### ❌ Frontend não conecta ao backend
+
+**Erro:** `Failed to fetch` ou `CORS error`
+
+**Solução:**
+1. Verifique se o backend está rodando em http://localhost:8000
+2. Confirme que `FRONTEND_URL` no `.env` está como `http://localhost:3000`
+3. Limpe o cache do navegador (Ctrl+Shift+Delete)
+4. Reinicie o backend
+
+---
+
+#### ❌ Análise com IA não funciona
+
+**Erro:** `OpenAI API error`
+
+**Solução:**
+1. Verifique se `OPENAI_API_KEY` está correto no `.env`
+2. Confirme que a chave está ativa em [platform.openai.com](https://platform.openai.com)
+3. Verifique se tem créditos disponíveis na sua conta OpenAI
+4. Reinicie o backend após alterar o `.env`
+
+---
+
+#### ❌ Upload de arquivos falha
+
+**Erro:** `Error uploading file`
+
+**Solução:**
+1. Verifique se o bucket `documents` foi criado no Supabase Storage
+2. Confirme que o bucket está marcado como **público**
+3. Verifique se `SUPABASE_URL` e `SUPABASE_KEY` estão corretos
+4. Teste a conexão com Supabase:
+```bash
+python -c "from services.supabase_service import supabase_service; print('✅ Supabase OK!')"
+```
+
+---
+
+### 🎉 Pronto para Usar!
+
+Agora você tem um sistema completo de gestão de documentos com:
+- ✅ Upload e armazenamento em nuvem
+- ✅ Análise inteligente com IA
+- ✅ Dashboard com analytics
+- ✅ API REST documentada
+- ✅ Interface moderna e responsiva
+
+**Próximas melhorias sugeridas:**
+- 🔐 Adicionar autenticação de usuários
+- 📝 Implementar OCR para PDFs
+- 🔄 Configurar workflows n8n
+- 📱 Criar app mobile
+- 🌐 Deploy em produção (Vercel + Railway)
+
+---
+
 <div align="center">
 
 **Desenvolvido com ❤️ como demonstração de organização de dados e automação**
