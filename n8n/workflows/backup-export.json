@@ -1,0 +1,114 @@
+{
+    "name": "Weekly Backup and Export",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "cronExpression",
+                            "expression": "0 2 * * 0"
+                        }
+                    ]
+                }
+            },
+            "id": "schedule-weekly",
+            "name": "Schedule - Weekly Sunday 2 AM",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "http://localhost:8000/api/documents?limit=1000",
+                "options": {}
+            },
+            "id": "get-all-documents",
+            "name": "Get All Documents",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "toJson",
+                "options": {
+                    "fileName": "=documents_backup_{{$now.format('YYYY-MM-DD')}}.json"
+                }
+            },
+            "id": "convert-to-json",
+            "name": "Convert to JSON",
+            "type": "n8n-nodes-base.convertToFile",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "upload",
+                "path": "=/backups/{{$now.format('YYYY-MM-DD')}}/",
+                "binaryData": true
+            },
+            "id": "save-to-storage",
+            "name": "Save to Cloud Storage",
+            "type": "n8n-nodes-base.googleDrive",
+            "typeVersion": 3,
+            "position": [
+                850,
+                300
+            ],
+            "credentials": {
+                "googleDriveOAuth2Api": {
+                    "id": "1",
+                    "name": "Google Drive Account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Schedule - Weekly Sunday 2 AM": {
+            "main": [
+                [
+                    {
+                        "node": "Get All Documents",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get All Documents": {
+            "main": [
+                [
+                    {
+                        "node": "Convert to JSON",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Convert to JSON": {
+            "main": [
+                [
+                    {
+                        "node": "Save to Cloud Storage",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

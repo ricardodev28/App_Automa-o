@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Documentos</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="url(#gradient1)"/>
+                        <path d="M10 12h12M10 16h12M10 20h8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="gradient1" x1="0" y1="0" x2="32" y2="32">
+                                <stop stop-color="#6366f1"/>
+                                <stop offset="1" stop-color="#8b5cf6"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <h1>Gestão de Documentos</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="dashboard.refresh()">
+                        <span>🔄</span> Atualizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <h3>Arraste arquivos aqui ou clique para selecionar</h3>
+                    <p>Suporta PDF, DOCX, TXT, imagens e mais</p>
+                    <input type="file" id="fileInput" multiple hidden>
+                    <div class="upload-options">
+                        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                            Selecionar Arquivos
+                        </button>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="aiAnalysisCheckbox" checked>
+                            <span>Analisar com IA</span>
+                        </label>
+                    </div>
+                </div>
+                <div id="uploadProgress" class="upload-progress hidden">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p id="progressText">Enviando...</p>
+                </div>
+            </section>
+
+            <!-- Filters and Search -->
+            <section class="filters-section">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Buscar documentos...">
+                </div>
+                <div class="filters">
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">Todas as Categorias</option>
+                        <option value="Financeiro">Financeiro</option>
+                        <option value="RH">RH</option>
+                        <option value="Técnico">Técnico</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Legal">Legal</option>
+                        <option value="Geral">Geral</option>
+                    </select>
+                    <select id="typeFilter" class="filter-select">
+                        <option value="">Todos os Tipos</option>
+                        <option value="pdf">PDF</option>
+                        <option value="docx">DOCX</option>
+                        <option value="txt">TXT</option>
+                        <option value="xlsx">XLSX</option>
+                        <option value="jpg">Imagens</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Dashboard -->
+            <section class="dashboard-section">
+                <h2>📊 Dashboard</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📄</div>
+                        <div class="stat-content">
+                            <p class="stat-label">Total de Documentos</p>
+                            <p class="stat-value" id="totalDocs">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💾</div>
+                        <div class="stat-content">
+                            <p class="stat-label">Armazenamento</p>
+                            <p class="stat-value" id="totalSize">0 MB</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏷️</div>
+                        <div class="stat-content">
+                            <p class="stat-label">Tags Únicas</p>
+                            <p class="stat-value" id="totalTags">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📁</div>
+                        <div class="stat-content">
+                            <p class="stat-label">Categorias</p>
+                            <p class="stat-value" id="totalCategories">6</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Distribuição por Categoria</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Tags Mais Usadas</h3>
+                        <canvas id="tagsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Documents Grid -->
+            <section class="documents-section">
+                <div class="section-header">
+                    <h2>📚 Documentos</h2>
+                    <p id="documentsCount">0 documentos encontrados</p>
+                </div>
+                <div id="documentsGrid" class="documents-grid">
+                    <!-- Documents will be rendered here -->
+                </div>
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <h3>Nenhum documento encontrado</h3>
+                    <p>Faça upload de documentos para começar</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Editar Documento</h2>
+                <button class="modal-close" onclick="ui.closeModal('editModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="editTitle" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Autor</label>
+                    <input type="text" id="editAuthor" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select id="editCategory" class="form-input">
+                        <option value="Financeiro">Financeiro</option>
+                        <option value="RH">RH</option>
+                        <option value="Técnico">Técnico</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Legal">Legal</option>
+                        <option value="Geral">Geral</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tags (separadas por vírgula)</label>
+                    <input type="text" id="editTags" class="form-input" placeholder="tag1, tag2, tag3">
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="editDescription" class="form-input" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="ui.closeModal('editModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="app.saveDocument()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Analysis Modal -->
+    <div id="aiModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🤖 Análise com IA</h2>
+                <button class="modal-close" onclick="ui.closeModal('aiModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="aiLoading" class="ai-loading">
+                    <div class="spinner"></div>
+                    <p>Analisando documento com IA...</p>
+                </div>
+                <div id="aiResults" class="ai-results hidden">
+                    <div class="ai-result-item">
+                        <strong>Título Sugerido:</strong>
+                        <p id="aiTitle"></p>
+                    </div>
+                    <div class="ai-result-item">
+                        <strong>Autor Sugerido:</strong>
+                        <p id="aiAuthor"></p>
+                    </div>
+                    <div class="ai-result-item">
+                        <strong>Categoria Sugerida:</strong>
+                        <p id="aiCategory"></p>
+                    </div>
+                    <div class="ai-result-item">
+                        <strong>Tags Sugeridas:</strong>
+                        <div id="aiTags" class="tags-container"></div>
+                    </div>
+                    <div class="ai-result-item">
+                        <strong>Resumo:</strong>
+                        <p id="aiSummary"></p>
+                    </div>
+                    <div class="ai-confidence">
+                        <strong>Confiança:</strong>
+                        <div class="confidence-bar">
+                            <div id="confidenceLevel" class="confidence-fill"></div>
+                        </div>
+                        <span id="confidenceText">0%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="ui.closeModal('aiModal')">Fechar</button>
+                <button class="btn btn-primary" id="applyAiBtn" onclick="app.applyAiSuggestions()" disabled>
+                    Aplicar Sugestões
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

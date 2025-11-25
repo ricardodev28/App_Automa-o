@@ -1,0 +1,84 @@
+{
+    "name": "Daily Document Summary Notification",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "cronExpression",
+                            "expression": "0 9 * * *"
+                        }
+                    ]
+                }
+            },
+            "id": "schedule-trigger",
+            "name": "Schedule - Daily 9 AM",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "http://localhost:8000/api/analytics/stats",
+                "options": {}
+            },
+            "id": "get-analytics",
+            "name": "Get Analytics",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "sendEmail",
+                "fromEmail": "noreply@documentmanager.com",
+                "toEmail": "team@company.com",
+                "subject": "Resumo Diário de Documentos",
+                "emailFormat": "html",
+                "text": "=<h2>📊 Resumo Diário de Documentos</h2>\n<p><strong>Total de Documentos:</strong> {{$json[\"total_documents\"]}}</p>\n<p><strong>Armazenamento Total:</strong> {{$json[\"total_size\"]}} bytes</p>\n<h3>Distribuição por Categoria:</h3>\n<ul>\n{{$json[\"categories\"].map(c => `<li>${c.category}: ${c.count} (${c.percentage}%)</li>`).join('')}}\n</ul>\n<p>Acesse o sistema para mais detalhes!</p>"
+            },
+            "id": "send-email",
+            "name": "Send Email Notification",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2,
+            "position": [
+                650,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Schedule - Daily 9 AM": {
+            "main": [
+                [
+                    {
+                        "node": "Get Analytics",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Analytics": {
+            "main": [
+                [
+                    {
+                        "node": "Send Email Notification",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    }
+}
